@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Queen.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">xxlchess_scaffold8</a> &gt; <a href="index.source.html" class="el_package">XXLChess.entities</a> &gt; <span class="el_source">Queen.java</span></div><h1>Queen.java</h1><pre class="source lang-java linenums">package XXLChess.entities;
+
+import XXLChess.utils.Coordinate;
+
+/**
+ * The Queen class represents a Queen chess piece.
+ * A Queen can any number of unoccupied squares in any direction -- horizontally, vertically, or diagonally.
+ * The Queen's symbol is 'q' for white and 'Q' for black.
+ */
+public class Queen extends Piece {
+    /**
+     * Constructor for creating a new instance of a Queen piece.
+     * @param owner the Owner (BLACK/WHITE) of this piece.
+     * @param coordinate the initial Coordinate for this piece.
+     */
+    public Queen(Owner owner, Coordinate coordinate) {
+<span class="nc" id="L17">        super(owner, coordinate);</span>
+<span class="nc" id="L18">    }</span>
+
+    /**
+     * Returns the character symbol for this piece.
+     * The symbol is 'q' for a white Queen and 'Q' for a black Queen.
+     *
+     * @return the character symbol for this piece.
+     */
+    @Override
+    public char toChar() {
+<span class="nc bnc" id="L28" title="All 2 branches missed.">        if(owner == Owner.BLACK){</span>
+<span class="nc" id="L29">            return 'Q';</span>
+        }else {
+<span class="nc" id="L31">            return 'q';</span>
+        }
+    }
+
+    /**
+     * Determines if this Queen can move to a given target coordinate on a given board.
+     * The Queen can move like a Bishop or a Rook.
+     *
+     * @param board  the Board on which to test the move.
+     * @param target the target Coordinate to move to.
+     * @return true if the move is valid, false otherwise.
+     */
+    @Override
+    public boolean canEat(Board board, Coordinate target) {
+<span class="nc" id="L45">        int dx = Math.abs(target.getX() - this.coordinate.getX());</span>
+<span class="nc" id="L46">        int dy = Math.abs(target.getY() - this.coordinate.getY());</span>
+
+        // Check if the move is valid for a Bishop
+<span class="nc bnc" id="L49" title="All 2 branches missed.">        if (dx == dy) {</span>
+<span class="nc bnc" id="L50" title="All 2 branches missed.">            if (!board.isPathClear(this.coordinate, target)) {</span>
+<span class="nc" id="L51">                return false;</span>
+            }
+<span class="nc" id="L53">            Piece targetPiece = board.getPieceAt(target);</span>
+            // The target square can be empty or contain an opponent's piece
+<span class="nc bnc" id="L55" title="All 4 branches missed.">            return targetPiece == null || targetPiece.getOwner() != this.getOwner();</span>
+        }
+
+        // Check if the move is valid for a Rook
+<span class="nc bnc" id="L59" title="All 4 branches missed.">        if (dx == 0 || dy == 0) {</span>
+<span class="nc bnc" id="L60" title="All 2 branches missed.">            if (!board.isPathClear(this.coordinate, target)) {</span>
+<span class="nc" id="L61">                return false;</span>
+            }
+<span class="nc" id="L63">            Piece targetPiece = board.getPieceAt(target);</span>
+            // The target square can be empty or contain an opponent's piece
+<span class="nc bnc" id="L65" title="All 4 branches missed.">            return targetPiece == null || targetPiece.getOwner() != this.getOwner();</span>
+        }
+
+<span class="nc" id="L68">        return false;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>General.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">xxlchess_scaffold8</a> &gt; <a href="index.source.html" class="el_package">XXLChess.entities</a> &gt; <span class="el_source">General.java</span></div><h1>General.java</h1><pre class="source lang-java linenums">package XXLChess.entities;
+
+import XXLChess.utils.Coordinate;
+
+/**
+ * The General class represents a General chess piece.
+ * In XXL Chess, a General is a piece that combines the powers of a King and a Knight.
+ * This means it can move one square in any direction (like a King) or it can move in an 'L' shape like a Knight
+ * (2 squares in one direction and 1 square at a right angle).
+ * The General's symbol is 'g' for white and 'G' for black.
+ */
+public class General extends Piece {
+    /**
+     * Constructor for creating a new instance of a General piece.
+     *
+     * @param owner      the Owner (BLACK/WHITE) of this piece.
+     * @param coordinate the initial Coordinate for this piece.
+     */
+    public General(Owner owner, Coordinate coordinate) {
+<span class="nc" id="L20">        super(owner, coordinate);</span>
+<span class="nc" id="L21">    }</span>
+
+    /**
+     * Returns the character symbol for this piece.
+     * The symbol is 'g' for a white General and 'G' for a black General.
+     *
+     * @return the character symbol for this piece.
+     */
+    @Override
+    public char toChar() {
+<span class="nc bnc" id="L31" title="All 2 branches missed.">        if (owner == Owner.BLACK) {</span>
+<span class="nc" id="L32">            return 'G';</span>
+        } else {
+<span class="nc" id="L34">            return 'g';</span>
+        }
+    }
+
+    /**
+     * Determines if this General can move to a given target coordinate on a given board.
+     * The General can move like a King or a Knight.
+     *
+     * @param board  the Board on which to test the move.
+     * @param target the target Coordinate to move to.
+     * @return true if the move is valid, false otherwise.
+     */
+    @Override
+    public boolean canEat(Board board, Coordinate target) {
+<span class="nc" id="L48">        int dx = Math.abs(target.getX() - this.coordinate.getX());</span>
+<span class="nc" id="L49">        int dy = Math.abs(target.getY() - this.coordinate.getY());</span>
+
+        // Check if the move is valid for a King
+<span class="nc bnc" id="L52" title="All 4 branches missed.">        if (dx &lt;= 1 &amp;&amp; dy &lt;= 1) {</span>
+<span class="nc" id="L53">            Piece targetPiece = board.getPieceAt(target);</span>
+            // The target square can be empty or contain an opponent's piece
+<span class="nc bnc" id="L55" title="All 4 branches missed.">            return targetPiece == null || targetPiece.getOwner() != this.getOwner();</span>
+        }
+
+        // Check if the move is valid for a Knight
+<span class="nc bnc" id="L59" title="All 8 branches missed.">        if ((dx == 2 &amp;&amp; dy == 1) || (dx == 1 &amp;&amp; dy == 2)) {</span>
+<span class="nc" id="L60">            Piece targetPiece = board.getPieceAt(target);</span>
+            // The target square can be empty or contain an opponent's piece
+<span class="nc bnc" id="L62" title="All 4 branches missed.">            return targetPiece == null || targetPiece.getOwner() != this.getOwner();</span>
+        }
+
+<span class="nc" id="L65">        return false;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

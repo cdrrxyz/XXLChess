@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Knight.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">xxlchess_scaffold8</a> &gt; <a href="index.source.html" class="el_package">XXLChess.entities</a> &gt; <span class="el_source">Knight.java</span></div><h1>Knight.java</h1><pre class="source lang-java linenums">package XXLChess.entities;
+
+import XXLChess.utils.Coordinate;
+
+/**
+ * The Knight class represents a Knight chess piece.
+ * A Knight can move to any square not already attacked by another piece of its own side,
+ * moving two squares horizontally then one square vertically, or moving one square horizontally then two squares vertically.
+ * This is a move that can be described as an &quot;L-shape&quot;.
+ * The Knight's symbol is 'n' for white and 'N' for black.
+ */
+public class Knight extends Piece {
+    /**
+     * Constructor for creating a new instance of a Knight piece.
+     *
+     * @param owner      the Owner (BLACK/WHITE) of this piece.
+     * @param coordinate the initial Coordinate for this piece.
+     */
+    public Knight(Owner owner, Coordinate coordinate) {
+<span class="nc" id="L20">        super(owner, coordinate);</span>
+<span class="nc" id="L21">    }</span>
+    /**
+     * Returns the character symbol for this piece.
+     * The symbol is 'n' for a white Knight and 'N' for a black Knight.
+     *
+     * @return the character symbol for this piece.
+     */
+    @Override
+    public char toChar() {
+<span class="nc bnc" id="L30" title="All 2 branches missed.">        if(owner == Owner.BLACK){</span>
+<span class="nc" id="L31">            return 'N';</span>
+        }else {
+<span class="nc" id="L33">            return 'n';</span>
+        }
+    }
+    /**
+     * Determines if this Knight can move to a given target coordinate on a given board.
+     * The Knight moves in an &quot;L-shape&quot;: two squares horizontally then one square vertically, or one square horizontally then two squares vertically.
+     *
+     * @param board  the Board on which to test the move.
+     * @param target the target Coordinate to move to.
+     * @return true if the move is valid, false otherwise.
+     */
+    @Override
+    public boolean canEat(Board board, Coordinate target) {
+<span class="nc" id="L46">        int dx = Math.abs(target.getX() - this.coordinate.getX());</span>
+<span class="nc" id="L47">        int dy = Math.abs(target.getY() - this.coordinate.getY());</span>
+
+        // Check if the move is an &quot;L&quot; shape
+<span class="nc bnc" id="L50" title="All 8 branches missed.">        if ((dx == 2 &amp;&amp; dy == 1) || (dx == 1 &amp;&amp; dy == 2)) {</span>
+<span class="nc" id="L51">            Piece targetPiece = board.getPieceAt(target);</span>
+            // The target square can be empty or contain an opponent's piece
+<span class="nc bnc" id="L53" title="All 4 branches missed.">            return targetPiece == null || targetPiece.getOwner() != this.getOwner();</span>
+        }
+
+<span class="nc" id="L56">        return false;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

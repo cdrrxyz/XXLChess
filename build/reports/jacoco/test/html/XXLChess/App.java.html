@@ -1,0 +1,409 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>App.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">xxlchess_scaffold8</a> &gt; <a href="index.source.html" class="el_package">XXLChess</a> &gt; <span class="el_source">App.java</span></div><h1>App.java</h1><pre class="source lang-java linenums">package XXLChess;
+
+//import org.reflections.Reflections;
+//import org.reflections.scanners.Scanners;
+
+import XXLChess.entities.*;
+import XXLChess.utils.Color;
+import XXLChess.utils.Constants;
+import XXLChess.utils.Coordinate;
+import processing.core.PApplet;
+import processing.core.PImage;
+import processing.data.JSONObject;
+import processing.data.JSONArray;
+import processing.core.PFont;
+import processing.event.MouseEvent;
+
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
+import java.awt.Font;
+import java.io.*;
+import java.util.*;
+
+import static XXLChess.utils.Constants.*;
+
+public class App extends PApplet {
+
+    public static final int SPRITESIZE = 480;
+    public static final int CELLSIZE = 48;
+    public static final int SIDEBAR = 120;
+    public static final int BOARD_WIDTH = 14;
+
+<span class="nc" id="L32">    public static int WIDTH = CELLSIZE * BOARD_WIDTH + SIDEBAR;</span>
+<span class="nc" id="L33">    public static int HEIGHT = BOARD_WIDTH * CELLSIZE;</span>
+    public static final int FPS = 60;
+
+
+    // Image
+    private PImage AMAZON_BLACK;
+    private PImage ARCHBISHOP_BLACK;
+    private PImage BISHOP_BLACK;
+    private PImage CAMEL_BLACK;
+    private PImage CHANCELLOR_BLACK;
+    private PImage KING_BLACK;
+    private PImage KNIGHT_KING_BLACK;
+    private PImage KNIGHT_BLACK;
+    private PImage PAWN_BLACK;
+    private PImage QUEEN_BLACK;
+    private PImage ROOK_BLACK;
+    private PImage AMAZON_WHITE;
+    private PImage ARCHBISHOP_WHITE;
+    private PImage BISHOP_WHITE;
+    private PImage CAMEL_WHITE;
+    private PImage CHANCELLOR_WHITE;
+    private PImage KING_WHITE;
+    private PImage KNIGHT_KING_WHITE;
+    private PImage KNIGHT_WHITE;
+    private PImage PAWN_WHITE;
+    private PImage QUEEN_WHITE;
+    private PImage ROOK_WHITE;
+
+    public String configPath;
+
+    Board board;
+    private boolean userBlock;
+
+
+<span class="nc" id="L67">    public App() {</span>
+<span class="nc" id="L68">        this.configPath = &quot;config.json&quot;;</span>
+<span class="nc" id="L69">    }</span>
+
+    /**
+     * Initialise the setting of the window size.
+     */
+    public void settings() {
+<span class="nc" id="L75">        size(WIDTH, HEIGHT);</span>
+<span class="nc" id="L76">    }</span>
+
+    /**
+     * Load all resources such as images. Initialise the elements such as the player, enemies and map elements.
+     */
+    public void setup() {
+<span class="nc" id="L82">        frameRate(FPS);</span>
+
+
+        // Load images during setup
+
+<span class="nc" id="L87">        AMAZON_BLACK = loadImage(&quot;src/main/resources/XXLChess/b-amazon.png&quot;);</span>
+<span class="nc" id="L88">        ARCHBISHOP_BLACK = loadImage(&quot;src/main/resources/XXLChess/b-archbishop.png&quot;);</span>
+<span class="nc" id="L89">        BISHOP_BLACK = loadImage(&quot;src/main/resources/XXLChess/b-bishop.png&quot;);</span>
+<span class="nc" id="L90">        CAMEL_BLACK = loadImage(&quot;src/main/resources/XXLChess/b-camel.png&quot;);</span>
+<span class="nc" id="L91">        CHANCELLOR_BLACK = loadImage(&quot;src/main/resources/XXLChess/b-chancellor.png&quot;);</span>
+<span class="nc" id="L92">        KING_BLACK = loadImage(&quot;src/main/resources/XXLChess/b-king.png&quot;);</span>
+<span class="nc" id="L93">        KNIGHT_KING_BLACK = loadImage(&quot;src/main/resources/XXLChess/b-knight-king.png&quot;);</span>
+<span class="nc" id="L94">        KNIGHT_BLACK = loadImage(&quot;src/main/resources/XXLChess/b-knight.png&quot;);</span>
+<span class="nc" id="L95">        PAWN_BLACK = loadImage(&quot;src/main/resources/XXLChess/b-pawn.png&quot;);</span>
+<span class="nc" id="L96">        QUEEN_BLACK = loadImage(&quot;src/main/resources/XXLChess/b-queen.png&quot;);</span>
+<span class="nc" id="L97">        ROOK_BLACK = loadImage(&quot;src/main/resources/XXLChess/b-rook.png&quot;);</span>
+<span class="nc" id="L98">        AMAZON_WHITE = loadImage(&quot;src/main/resources/XXLChess/w-amazon.png&quot;);</span>
+<span class="nc" id="L99">        ARCHBISHOP_WHITE = loadImage(&quot;src/main/resources/XXLChess/w-archbishop.png&quot;);</span>
+<span class="nc" id="L100">        BISHOP_WHITE = loadImage(&quot;src/main/resources/XXLChess/w-bishop.png&quot;);</span>
+<span class="nc" id="L101">        CAMEL_WHITE = loadImage(&quot;src/main/resources/XXLChess/w-camel.png&quot;);</span>
+<span class="nc" id="L102">        CHANCELLOR_WHITE = loadImage(&quot;src/main/resources/XXLChess/w-chancellor.png&quot;);</span>
+<span class="nc" id="L103">        KING_WHITE = loadImage(&quot;src/main/resources/XXLChess/w-king.png&quot;);</span>
+<span class="nc" id="L104">        KNIGHT_KING_WHITE = loadImage(&quot;src/main/resources/XXLChess/w-knight-king.png&quot;);</span>
+<span class="nc" id="L105">        KNIGHT_WHITE = loadImage(&quot;src/main/resources/XXLChess/w-knight.png&quot;);</span>
+<span class="nc" id="L106">        PAWN_WHITE = loadImage(&quot;src/main/resources/XXLChess/w-pawn.png&quot;);</span>
+<span class="nc" id="L107">        QUEEN_WHITE = loadImage(&quot;src/main/resources/XXLChess/w-queen.png&quot;);</span>
+<span class="nc" id="L108">        ROOK_WHITE = loadImage(&quot;src/main/resources/XXLChess/w-rook.png&quot;);</span>
+        // Load config
+<span class="nc" id="L110">        JSONObject conf = loadJSONObject(new File(this.configPath));</span>
+
+<span class="nc" id="L112">        JSONObject timeControls = conf.getJSONObject(&quot;time_controls&quot;);</span>
+
+<span class="nc" id="L114">        JSONObject player = timeControls.getJSONObject(&quot;player&quot;);</span>
+<span class="nc" id="L115">        JSONObject cpu = timeControls.getJSONObject(&quot;cpu&quot;);</span>
+
+<span class="nc" id="L117">        int playerSeconds = player.getInt(&quot;seconds&quot;);</span>
+<span class="nc" id="L118">        int cpuSeconds = cpu.getInt(&quot;seconds&quot;);</span>
+
+<span class="nc" id="L120">        int playerIncrement = player.getInt(&quot;increment&quot;);</span>
+<span class="nc" id="L121">        int cpuIncrement = player.getInt(&quot;increment&quot;);</span>
+
+
+<span class="nc bnc" id="L124" title="All 2 branches missed.">        if (conf.get(&quot;player_colour&quot;).equals(&quot;white&quot;)) {</span>
+<span class="nc" id="L125">            board = new Board(Owner.WHITE);</span>
+<span class="nc" id="L126">            board.timeWhite = playerSeconds * FPS;</span>
+<span class="nc" id="L127">            board.timeBlack = cpuSeconds * FPS;</span>
+<span class="nc" id="L128">            board.timeWhiteIncrement = playerIncrement * FPS;</span>
+<span class="nc" id="L129">            board.timeBlackIncrement = cpuIncrement * FPS;</span>
+        } else {
+<span class="nc" id="L131">            board = new Board(Owner.BLACK);</span>
+<span class="nc" id="L132">            board.timeBlack = playerSeconds * FPS;</span>
+<span class="nc" id="L133">            board.timeWhite = cpuIncrement * FPS;</span>
+<span class="nc" id="L134">            board.timeWhiteIncrement = cpuIncrement * FPS;</span>
+<span class="nc" id="L135">            board.timeBlackIncrement = playerIncrement * FPS;</span>
+        }
+<span class="nc" id="L137">        isGameEnd = false;</span>
+        // Load board
+        try {
+<span class="nc" id="L140">            BufferedReader reader = new BufferedReader(new FileReader(&quot;level1.txt&quot;));</span>
+<span class="nc bnc" id="L141" title="All 2 branches missed.">            for (int i = 0; i &lt; BOARD_SIZE; i++) {</span>
+<span class="nc" id="L142">                String line = reader.readLine();</span>
+<span class="nc bnc" id="L143" title="All 2 branches missed.">                if (line != null) {</span>
+<span class="nc bnc" id="L144" title="All 2 branches missed.">                    for (int j = 0; j &lt; line.length(); j++) {</span>
+<span class="nc" id="L145">                        char pieceChar = line.charAt(j);</span>
+<span class="nc bnc" id="L146" title="All 2 branches missed.">                        if (pieceChar != ' ') {  // Ignore empty spaces.</span>
+<span class="nc" id="L147">                            Coordinate coordinate = new Coordinate(j, i);</span>
+<span class="nc" id="L148">                            Piece piece = PieceFactory.buildPiece(pieceChar, coordinate);</span>
+<span class="nc" id="L149">                            board.addPiece(piece);</span>
+                        }
+                    }
+                }
+            }
+
+<span class="nc" id="L155">            reader.close();</span>
+<span class="nc" id="L156">        } catch (IOException e) {</span>
+<span class="nc" id="L157">            throw new RuntimeException(e);</span>
+<span class="nc" id="L158">        }</span>
+
+<span class="nc" id="L160">    }</span>
+
+    /**
+     * Receive key pressed signal from the keyboard.
+     */
+    public void keyPressed() {
+        // Press 'r' to restart
+<span class="nc bnc" id="L167" title="All 2 branches missed.">        if (key == 'r') {</span>
+            // reset game
+<span class="nc bnc" id="L169" title="All 2 branches missed.">            if (isGameEnd) {</span>
+<span class="nc" id="L170">                setup();</span>
+<span class="nc" id="L171">                isGameEnd = false;</span>
+<span class="nc" id="L172">                draw();</span>
+            }
+
+        }
+        // Press 'e' to resign
+<span class="nc bnc" id="L177" title="All 2 branches missed.">        if (key == 'e') {</span>
+<span class="nc" id="L178">            board.gameStatus = GAME_STATUS.RESIGNED;</span>
+        }
+<span class="nc" id="L180">    }</span>
+
+    /**
+     * Receive key released signal from the keyboard.
+     */
+    public void keyReleased() {
+
+<span class="nc" id="L187">    }</span>
+
+    @Override
+    public void mousePressed(MouseEvent e) {
+<span class="nc" id="L191">        int x = e.getX();</span>
+<span class="nc" id="L192">        int y = e.getY();</span>
+
+        // Parse to coordinate
+<span class="nc" id="L195">        x = x / BLOCK_A;</span>
+<span class="nc" id="L196">        y = y / BLOCK_A;</span>
+<span class="nc" id="L197">        board.clickBoard(new Coordinate(x, y));</span>
+
+<span class="nc" id="L199">    }</span>
+
+    @Override
+    public void mouseDragged(MouseEvent e) {
+
+<span class="nc" id="L204">    }</span>
+
+<span class="nc" id="L206">    private boolean isGameEnd = false;</span>
+
+    /**
+     * Draw all elements in the game by current frame.
+     */
+    public void draw() {
+<span class="nc bnc" id="L212" title="All 2 branches missed.">        if (isGameEnd) {</span>
+<span class="nc" id="L213">            return;</span>
+        }
+
+<span class="nc" id="L216">        background(150);</span>
+
+<span class="nc bnc" id="L218" title="All 2 branches missed.">        if (board.getTurns() == Owner.BLACK) {</span>
+<span class="nc" id="L219">            board.timeBlack--;</span>
+        } else {
+<span class="nc" id="L221">            board.timeWhite--;</span>
+        }
+
+<span class="nc bnc" id="L224" title="All 2 branches missed.">        if (board.getTurns() != board.getPlayerHandle()) {</span>
+<span class="nc" id="L225">            board.AIMove();</span>
+        }
+
+<span class="nc bnc" id="L228" title="All 2 branches missed.">        for (int x = 0; x &lt; BOARD_SIZE; x++) {</span>
+<span class="nc bnc" id="L229" title="All 2 branches missed.">            for (int y = 0; y &lt; BOARD_SIZE; y++) {</span>
+<span class="nc" id="L230">                drawRect(BROWN, new Coordinate(x, y));</span>
+            }
+        }
+
+<span class="nc" id="L234">        ArrayList&lt;Block&gt; blocks = board.getBlocks();</span>
+
+<span class="nc bnc" id="L236" title="All 2 branches missed.">        for (Block block : blocks) {</span>
+<span class="nc" id="L237">            drawRect(block.getColor(), block.getCoordinate());</span>
+<span class="nc" id="L238">        }</span>
+
+<span class="nc bnc" id="L240" title="All 2 branches missed.">        for (Piece piece : board.getPieces()) {</span>
+<span class="nc" id="L241">            drawPiece(piece);</span>
+<span class="nc" id="L242">        }</span>
+
+<span class="nc" id="L244">        fill(255);</span>
+<span class="nc" id="L245">        textSize(24);</span>
+<span class="nc" id="L246">        int seconds = (board.timeBlack / FPS) % 60;</span>
+<span class="nc" id="L247">        int minutes = (board.timeBlack / FPS) / 60;</span>
+<span class="nc" id="L248">        String timeString = nf(minutes, 2) + &quot;:&quot; + nf(seconds, 2);</span>
+<span class="nc" id="L249">        text(timeString, 680, 60);</span>
+
+<span class="nc" id="L251">        seconds = (board.timeWhite / FPS) % 60;</span>
+<span class="nc" id="L252">        minutes = (board.timeWhite / FPS) / 60;</span>
+<span class="nc" id="L253">        timeString = nf(minutes, 2) + &quot;:&quot; + nf(seconds, 2);</span>
+<span class="nc" id="L254">        text(timeString, 680, 632);</span>
+
+<span class="nc bnc" id="L256" title="All 2 branches missed.">        if (board.gameStatus == GAME_STATUS.NO_WIN) {</span>
+<span class="nc" id="L257">            textSize(15);</span>
+<span class="nc" id="L258">            text(&quot;Stalemate – draw!\nPressed r to restart game&quot;, 680, 300,100,100);</span>
+<span class="nc" id="L259">            isGameEnd = true;</span>
+<span class="nc bnc" id="L260" title="All 2 branches missed.">        } else if (board.gameStatus == GAME_STATUS.GAME_OVER) {</span>
+<span class="nc bnc" id="L261" title="All 2 branches missed.">            if (board.winner == Owner.WHITE) {</span>
+<span class="nc" id="L262">                textSize(15);</span>
+<span class="nc" id="L263">                text(&quot;You won by checkmate!\nPress 'r' to restart the game&quot;, 680, 300,100,100);</span>
+            } else {
+<span class="nc" id="L265">                textSize(15);</span>
+<span class="nc" id="L266">                text(&quot;You lost by checkmate!\nPress 'r' to restart the game&quot;, 680, 300,100,100);</span>
+<span class="nc" id="L267">                isGameEnd = true;</span>
+            }
+
+<span class="nc bnc" id="L270" title="All 2 branches missed.">            for (Block block : board.getContributeBlocks()) {</span>
+<span class="nc" id="L271">                drawRect(block.getColor(), block.getCoordinate());</span>
+<span class="nc" id="L272">            }</span>
+
+        }
+
+<span class="nc bnc" id="L276" title="All 2 branches missed.">        if (board.timeWhite &lt; 0) {</span>
+<span class="nc" id="L277">            textSize(15);</span>
+<span class="nc" id="L278">            text(&quot;You lost on time!\nPress 'r' to restart game&quot;, 680, 300,100,100);</span>
+<span class="nc" id="L279">            isGameEnd = true;</span>
+        }
+<span class="nc bnc" id="L281" title="All 2 branches missed.">        if (board.timeBlack &lt; 0) {</span>
+<span class="nc" id="L282">            textSize(15);</span>
+<span class="nc" id="L283">            text(&quot;You win on time!\nPress 'r' to restart the game&quot;, 680, 300,100,100);</span>
+<span class="nc" id="L284">            isGameEnd = true;</span>
+        }
+
+<span class="nc bnc" id="L287" title="All 2 branches missed.">        if (board.gameStatus == GAME_STATUS.RESIGNED) {</span>
+<span class="nc" id="L288">            textSize(15);</span>
+<span class="nc" id="L289">            text(&quot;You resigned!\nPress 'r' to restart game&quot;,680,300,100,100);</span>
+<span class="nc" id="L290">            isGameEnd = true;</span>
+        }
+
+<span class="nc bnc" id="L293" title="All 4 branches missed.">        if (board.isMyKingChecked() || board.isOtherKingChecked()) {</span>
+<span class="nc" id="L294">            textSize(24);</span>
+<span class="nc" id="L295">            text(&quot;Check!&quot;, 680, 300);</span>
+<span class="nc bnc" id="L296" title="All 2 branches missed.">            if (board.checkHint &gt;= 0 ) {</span>
+<span class="nc" id="L297">                textSize(15);</span>
+<span class="nc" id="L298">                text(&quot;You must defend your king!&quot;,680,350,100,100);</span>
+            }
+        }
+
+
+
+
+
+<span class="nc" id="L306">    }</span>
+
+    // Add any additional methods or attributes you want. Please put classes in different files.
+
+
+    public static void main(String[] args) {
+<span class="nc" id="L312">        PApplet.main(&quot;XXLChess.App&quot;);</span>
+<span class="nc" id="L313">    }</span>
+
+    private void drawRect(Color color, Coordinate coordinate) {
+<span class="nc" id="L316">        noStroke();</span>
+<span class="nc bnc" id="L317" title="All 4 branches missed.">        if (color.equals(BROWN) &amp;&amp; (coordinate.getX() + coordinate.getY()) % 2 == 0) {</span>
+<span class="nc" id="L318">            color = LIGHT_BROWN;</span>
+        }
+<span class="nc bnc" id="L320" title="All 4 branches missed.">        if (color.equals(BLUE) &amp;&amp; (coordinate.getX() + coordinate.getY()) % 2 == 0) {</span>
+<span class="nc" id="L321">            color = LIGHT_BLUE;</span>
+        }
+<span class="nc" id="L323">        fill(color.getR(), color.getG(), color.getB());</span>
+<span class="nc" id="L324">        rect(</span>
+<span class="nc" id="L325">                Constants.BLOCK_A * coordinate.getX(),</span>
+<span class="nc" id="L326">                Constants.BLOCK_A * coordinate.getY(),</span>
+                Constants.BLOCK_A,
+                Constants.BLOCK_A
+        );
+
+<span class="nc" id="L331">    }</span>
+
+    private void drawPiece(Piece piece) {
+<span class="nc bnc" id="L334" title="All 23 branches missed.">        switch (piece.toChar()) {</span>
+            case 'R':
+<span class="nc" id="L336">                image(ROOK_BLACK, Constants.BLOCK_A * piece.getCoordinate().getX(), Constants.BLOCK_A * piece.getCoordinate().getY(), Constants.BLOCK_A, Constants.BLOCK_A);</span>
+<span class="nc" id="L337">                break;</span>
+            case 'r':
+<span class="nc" id="L339">                image(ROOK_WHITE, Constants.BLOCK_A * piece.getCoordinate().getX(), Constants.BLOCK_A * piece.getCoordinate().getY(), Constants.BLOCK_A, Constants.BLOCK_A);</span>
+<span class="nc" id="L340">                break;</span>
+            case 'P':
+<span class="nc" id="L342">                image(PAWN_BLACK, Constants.BLOCK_A * piece.getCoordinate().getX(), Constants.BLOCK_A * piece.getCoordinate().getY(), Constants.BLOCK_A, Constants.BLOCK_A);</span>
+<span class="nc" id="L343">                break;</span>
+            case 'p':
+<span class="nc" id="L345">                image(PAWN_WHITE, Constants.BLOCK_A * piece.getCoordinate().getX(), Constants.BLOCK_A * piece.getCoordinate().getY(), Constants.BLOCK_A, Constants.BLOCK_A);</span>
+<span class="nc" id="L346">                break;</span>
+            case 'N':
+<span class="nc" id="L348">                image(KNIGHT_BLACK, Constants.BLOCK_A * piece.getCoordinate().getX(), Constants.BLOCK_A * piece.getCoordinate().getY(), Constants.BLOCK_A, Constants.BLOCK_A);</span>
+<span class="nc" id="L349">                break;</span>
+            case 'n':
+<span class="nc" id="L351">                image(KNIGHT_WHITE, Constants.BLOCK_A * piece.getCoordinate().getX(), Constants.BLOCK_A * piece.getCoordinate().getY(), Constants.BLOCK_A, Constants.BLOCK_A);</span>
+<span class="nc" id="L352">                break;</span>
+            case 'B':
+<span class="nc" id="L354">                image(BISHOP_BLACK, Constants.BLOCK_A * piece.getCoordinate().getX(), Constants.BLOCK_A * piece.getCoordinate().getY(), Constants.BLOCK_A, Constants.BLOCK_A);</span>
+<span class="nc" id="L355">                break;</span>
+            case 'b':
+<span class="nc" id="L357">                image(BISHOP_WHITE, Constants.BLOCK_A * piece.getCoordinate().getX(), Constants.BLOCK_A * piece.getCoordinate().getY(), Constants.BLOCK_A, Constants.BLOCK_A);</span>
+<span class="nc" id="L358">                break;</span>
+            case 'H':
+<span class="nc" id="L360">                image(ARCHBISHOP_BLACK, Constants.BLOCK_A * piece.getCoordinate().getX(), Constants.BLOCK_A * piece.getCoordinate().getY(), Constants.BLOCK_A, Constants.BLOCK_A);</span>
+<span class="nc" id="L361">                break;</span>
+            case 'h':
+<span class="nc" id="L363">                image(ARCHBISHOP_WHITE, Constants.BLOCK_A * piece.getCoordinate().getX(), Constants.BLOCK_A * piece.getCoordinate().getY(), Constants.BLOCK_A, Constants.BLOCK_A);</span>
+<span class="nc" id="L364">                break;</span>
+            case 'C':
+<span class="nc" id="L366">                image(CAMEL_BLACK, Constants.BLOCK_A * piece.getCoordinate().getX(), Constants.BLOCK_A * piece.getCoordinate().getY(), Constants.BLOCK_A, Constants.BLOCK_A);</span>
+<span class="nc" id="L367">                break;</span>
+            case 'c':
+<span class="nc" id="L369">                image(CAMEL_WHITE, Constants.BLOCK_A * piece.getCoordinate().getX(), Constants.BLOCK_A * piece.getCoordinate().getY(), Constants.BLOCK_A, Constants.BLOCK_A);</span>
+<span class="nc" id="L370">                break;</span>
+            case 'G':
+<span class="nc" id="L372">                image(KNIGHT_KING_BLACK, Constants.BLOCK_A * piece.getCoordinate().getX(), Constants.BLOCK_A * piece.getCoordinate().getY(), Constants.BLOCK_A, Constants.BLOCK_A);</span>
+<span class="nc" id="L373">                break;</span>
+            case 'g':
+<span class="nc" id="L375">                image(KNIGHT_KING_WHITE, Constants.BLOCK_A * piece.getCoordinate().getX(), Constants.BLOCK_A * piece.getCoordinate().getY(), Constants.BLOCK_A, Constants.BLOCK_A);</span>
+<span class="nc" id="L376">                break;</span>
+            case 'A':
+<span class="nc" id="L378">                image(AMAZON_BLACK, Constants.BLOCK_A * piece.getCoordinate().getX(), Constants.BLOCK_A * piece.getCoordinate().getY(), Constants.BLOCK_A, Constants.BLOCK_A);</span>
+<span class="nc" id="L379">                break;</span>
+            case 'a':
+<span class="nc" id="L381">                image(AMAZON_WHITE, Constants.BLOCK_A * piece.getCoordinate().getX(), Constants.BLOCK_A * piece.getCoordinate().getY(), Constants.BLOCK_A, Constants.BLOCK_A);</span>
+<span class="nc" id="L382">                break;</span>
+            case 'K':
+<span class="nc" id="L384">                image(KING_BLACK, Constants.BLOCK_A * piece.getCoordinate().getX(), Constants.BLOCK_A * piece.getCoordinate().getY(), Constants.BLOCK_A, Constants.BLOCK_A);</span>
+<span class="nc" id="L385">                break;</span>
+            case 'k':
+<span class="nc" id="L387">                image(KING_WHITE, Constants.BLOCK_A * piece.getCoordinate().getX(), Constants.BLOCK_A * piece.getCoordinate().getY(), Constants.BLOCK_A, Constants.BLOCK_A);</span>
+<span class="nc" id="L388">                break;</span>
+            case 'E':
+<span class="nc" id="L390">                image(CHANCELLOR_BLACK, Constants.BLOCK_A * piece.getCoordinate().getX(), Constants.BLOCK_A * piece.getCoordinate().getY(), Constants.BLOCK_A, Constants.BLOCK_A);</span>
+<span class="nc" id="L391">                break;</span>
+            case 'e':
+<span class="nc" id="L393">                image(CHANCELLOR_WHITE, Constants.BLOCK_A * piece.getCoordinate().getX(), Constants.BLOCK_A * piece.getCoordinate().getY(), Constants.BLOCK_A, Constants.BLOCK_A);</span>
+<span class="nc" id="L394">                break;</span>
+            case 'Q':
+<span class="nc" id="L396">                image(QUEEN_BLACK, Constants.BLOCK_A * piece.getCoordinate().getX(), Constants.BLOCK_A * piece.getCoordinate().getY(), Constants.BLOCK_A, Constants.BLOCK_A);</span>
+<span class="nc" id="L397">                break;</span>
+            case 'q':
+<span class="nc" id="L399">                image(QUEEN_WHITE, Constants.BLOCK_A * piece.getCoordinate().getX(), Constants.BLOCK_A * piece.getCoordinate().getY(), Constants.BLOCK_A, Constants.BLOCK_A);</span>
+<span class="nc" id="L400">                break;</span>
+            default:
+                break;
+
+        }
+<span class="nc" id="L405">    }</span>
+
+}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

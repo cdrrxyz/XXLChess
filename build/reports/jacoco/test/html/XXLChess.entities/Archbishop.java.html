@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Archbishop.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">xxlchess_scaffold8</a> &gt; <a href="index.source.html" class="el_package">XXLChess.entities</a> &gt; <span class="el_source">Archbishop.java</span></div><h1>Archbishop.java</h1><pre class="source lang-java linenums">package XXLChess.entities;
+
+import XXLChess.utils.Coordinate;
+
+/**
+ * The Archbishop class represents an Archbishop chess piece.
+ * In XXL Chess, an Archbishop is a piece that combines the powers of a Knight and a Bishop.
+ * The Archbishop's symbol is 'h' for white and 'H' for black.
+ */
+public class Archbishop extends Piece {
+    /**
+     * Constructs an Archbishop with the given owner and coordinate.
+     *
+     * @param owner      The owner, which can be either WHITE or BLACK.
+     * @param coordinate The initial coordinate of the piece.
+     */
+    public Archbishop(Owner owner, Coordinate coordinate) {
+<span class="nc" id="L18">        super(owner, coordinate);</span>
+<span class="nc" id="L19">    }</span>
+
+    /**
+     * Returns the character representation of the Archbishop, which is different for different owners.
+     *
+     * @return 'H' if the owner is BLACK, 'h' if the owner is WHITE.
+     */
+    @Override
+    public char toChar() {
+<span class="nc bnc" id="L28" title="All 2 branches missed.">        if (owner == Owner.BLACK) {</span>
+<span class="nc" id="L29">            return 'H';</span>
+        } else {
+<span class="nc" id="L31">            return 'h';</span>
+        }
+    }
+
+    /**
+     * Checks if the Archbishop can move to the target coordinate on the given board.
+     * The Archbishop can move like a Knight or a Bishop.
+     *
+     * @param board  The current chess board.
+     * @param target The target coordinate.
+     * @return true if the move is legal, false otherwise.
+     */
+    @Override
+    public boolean canEat(Board board, Coordinate target) {
+<span class="nc" id="L45">        int dx = Math.abs(target.getX() - this.coordinate.getX());</span>
+<span class="nc" id="L46">        int dy = Math.abs(target.getY() - this.coordinate.getY());</span>
+
+        // Check if the move is valid for a Knight
+<span class="nc bnc" id="L49" title="All 8 branches missed.">        if ((dx == 2 &amp;&amp; dy == 1) || (dx == 1 &amp;&amp; dy == 2)) {</span>
+<span class="nc" id="L50">            Piece targetPiece = board.getPieceAt(target);</span>
+            // The target square can be empty or contain an opponent's piece
+<span class="nc bnc" id="L52" title="All 4 branches missed.">            return targetPiece == null || targetPiece.getOwner() != this.getOwner();</span>
+        }
+
+        // Check if the move is valid for a Bishop
+<span class="nc bnc" id="L56" title="All 2 branches missed.">        if (dx == dy) {</span>
+<span class="nc bnc" id="L57" title="All 2 branches missed.">            if (!board.isPathClear(this.coordinate, target)) {</span>
+<span class="nc" id="L58">                return false;</span>
+            }
+<span class="nc" id="L60">            Piece targetPiece = board.getPieceAt(target);</span>
+            // The target square can be empty or contain an opponent's piece
+<span class="nc bnc" id="L62" title="All 4 branches missed.">            return targetPiece == null || targetPiece.getOwner() != this.getOwner();</span>
+        }
+
+<span class="nc" id="L65">        return false;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

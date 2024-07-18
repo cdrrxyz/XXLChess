@@ -1,0 +1,777 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Board.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">xxlchess_scaffold8</a> &gt; <a href="index.source.html" class="el_package">XXLChess.entities</a> &gt; <span class="el_source">Board.java</span></div><h1>Board.java</h1><pre class="source lang-java linenums">package XXLChess.entities;
+
+import XXLChess.utils.Coordinate;
+
+import static XXLChess.utils.Constants.*;
+
+import java.util.*;
+import java.util.function.Function;
+
+/**
+ * The board on which the game is played.
+ */
+public class Board {
+
+<span class="nc" id="L15">    public int checkHint = -1;</span>
+<span class="nc" id="L16">    public boolean gameOver = false;</span>
+<span class="nc" id="L17">    public boolean checked = false;</span>
+<span class="nc" id="L18">    public Owner winner = null;</span>
+
+    private Piece[][] board;
+
+    private Owner turns;
+    private Owner playerHandle;
+
+    public Owner getPlayerHandle() {
+<span class="nc" id="L26">        return playerHandle;</span>
+    }
+
+    public GAME_STATUS gameStatus;
+
+    public Owner getTurns() {
+<span class="nc" id="L32">        return turns;</span>
+    }
+
+<span class="nc" id="L35">    public int timeWhite = 0;</span>
+<span class="nc" id="L36">    public int timeWhiteIncrement = 0;</span>
+<span class="nc" id="L37">    public int timeBlack = 0;</span>
+<span class="nc" id="L38">    public int timeBlackIncrement = 0;</span>
+
+
+<span class="nc" id="L41">    private ArrayList&lt;King&gt; kings = new ArrayList&lt;&gt;();</span>
+
+<span class="nc" id="L43">    private Piece selectedPiece = null;</span>
+<span class="nc" id="L44">    private ArrayList&lt;Block&gt; prevStep = new ArrayList&lt;&gt;();</span>
+
+<span class="nc" id="L46">    public Board() {</span>
+<span class="nc" id="L47">        gameStatus = GAME_STATUS.NOT_END;</span>
+<span class="nc" id="L48">        turns = Owner.WHITE;</span>
+<span class="nc" id="L49">        board = new Piece[BOARD_SIZE][BOARD_SIZE];</span>
+<span class="nc bnc" id="L50" title="All 2 branches missed.">        for (int i = 0; i &lt; BOARD_SIZE; i++) {</span>
+<span class="nc bnc" id="L51" title="All 2 branches missed.">            for (int j = 0; j &lt; BOARD_SIZE; j++) {</span>
+<span class="nc" id="L52">                board[i][j] = null;</span>
+            }
+        }
+
+<span class="nc" id="L56">    }</span>
+
+
+<span class="nc" id="L59">    public Board(Owner playerHandle) {</span>
+<span class="nc" id="L60">        gameStatus = GAME_STATUS.NOT_END;</span>
+<span class="nc" id="L61">        turns = Owner.WHITE;</span>
+<span class="nc" id="L62">        this.playerHandle = playerHandle;</span>
+<span class="nc" id="L63">        board = new Piece[BOARD_SIZE][BOARD_SIZE];</span>
+<span class="nc bnc" id="L64" title="All 2 branches missed.">        for (int i = 0; i &lt; BOARD_SIZE; i++) {</span>
+<span class="nc bnc" id="L65" title="All 2 branches missed.">            for (int j = 0; j &lt; BOARD_SIZE; j++) {</span>
+<span class="nc" id="L66">                board[i][j] = null;</span>
+            }
+        }
+<span class="nc" id="L69">    }</span>
+
+<span class="nc" id="L71">    public Board(Board src) {</span>
+<span class="nc" id="L72">        turns = src.turns;</span>
+<span class="nc" id="L73">        this.playerHandle = src.playerHandle;</span>
+<span class="nc" id="L74">        this.prevStep = new ArrayList&lt;&gt;(src.prevStep);</span>
+<span class="nc" id="L75">        board = new Piece[BOARD_SIZE][BOARD_SIZE];</span>
+<span class="nc" id="L76">        this.kings = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L77" title="All 2 branches missed.">        for (int i = 0; i &lt; BOARD_SIZE; i++) {</span>
+<span class="nc bnc" id="L78" title="All 2 branches missed.">            for (int j = 0; j &lt; BOARD_SIZE; j++) {</span>
+<span class="nc bnc" id="L79" title="All 2 branches missed.">                if (src.board[i][j] != null)</span>
+<span class="nc" id="L80">                    this.addPiece(PieceFactory.buildPiece(src.board[i][j].toChar(), src.board[i][j].coordinate));</span>
+
+            }
+        }
+<span class="nc" id="L84">        this.selectedPiece = this.getPieceAt(src.selectedPiece.coordinate);</span>
+
+<span class="nc" id="L86">    }</span>
+
+    public void addPiece(Piece piece) {
+<span class="nc bnc" id="L89" title="All 2 branches missed.">        if (piece instanceof King)</span>
+<span class="nc" id="L90">            kings.add((King) piece);</span>
+<span class="nc" id="L91">        int x = piece.coordinate.getX();</span>
+<span class="nc" id="L92">        int y = piece.coordinate.getY();</span>
+<span class="nc" id="L93">        board[x][y] = piece;</span>
+<span class="nc" id="L94">    }</span>
+
+    public ArrayList&lt;Piece&gt; getPieces() {
+<span class="nc" id="L97">        ArrayList&lt;Piece&gt; pieces = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L98" title="All 2 branches missed.">        for (int i = 0; i &lt; BOARD_SIZE; i++) {</span>
+<span class="nc bnc" id="L99" title="All 2 branches missed.">            for (int j = 0; j &lt; BOARD_SIZE; j++) {</span>
+<span class="nc bnc" id="L100" title="All 2 branches missed.">                if (board[i][j] != null) {</span>
+<span class="nc" id="L101">                    pieces.add(board[i][j]);</span>
+                }
+            }
+        }
+<span class="nc" id="L105">        return pieces;</span>
+    }
+
+
+    public void clickBoard(Coordinate coordinate) {
+<span class="nc bnc" id="L110" title="All 8 branches missed.">        if (coordinate.getX() &lt; 0 || coordinate.getX() &gt;= 14 || coordinate.getY() &lt; 0 || coordinate.getY() &gt;= 14) {</span>
+<span class="nc bnc" id="L111" title="All 2 branches missed.">            if(isMyKingChecked()){</span>
+<span class="nc" id="L112">                checkHint = 0;</span>
+            }
+<span class="nc" id="L114">            return;</span>
+        }
+<span class="nc bnc" id="L116" title="All 2 branches missed.">        if (selectedPiece == null) {</span>
+<span class="nc" id="L117">            Piece piece = board[coordinate.getX()][coordinate.getY()];</span>
+<span class="nc bnc" id="L118" title="All 2 branches missed.">            if (piece == null) {</span>
+<span class="nc" id="L119">                selectedPiece = null;</span>
+<span class="nc bnc" id="L120" title="All 2 branches missed.">                if(isMyKingChecked()){</span>
+<span class="nc" id="L121">                    checkHint = 0;</span>
+                }
+<span class="nc" id="L123">                return;</span>
+            }
+<span class="nc bnc" id="L125" title="All 2 branches missed.">            if (piece.equals(selectedPiece)) {</span>
+<span class="nc" id="L126">                selectedPiece = null;</span>
+<span class="nc bnc" id="L127" title="All 2 branches missed.">                if(isMyKingChecked()){</span>
+<span class="nc" id="L128">                    checkHint = 0;</span>
+                }
+<span class="nc" id="L130">                return;</span>
+            }
+<span class="nc bnc" id="L132" title="All 4 branches missed.">            if (turns == playerHandle &amp;&amp; piece.owner == playerHandle) {</span>
+<span class="nc" id="L133">                selectedPiece = piece;</span>
+<span class="nc bnc" id="L134" title="All 4 branches missed.">                if(isMyKingChecked() &amp;&amp; getAccessBlocks().isEmpty()){</span>
+<span class="nc" id="L135">                    checkHint = 0;</span>
+                }
+            }
+<span class="nc" id="L138">        } else {</span>
+<span class="nc" id="L139">            ArrayList&lt;Block&gt; accessBlocks = getAccessBlocks();</span>
+<span class="nc bnc" id="L140" title="All 4 branches missed.">            if(isMyKingChecked() &amp;&amp; getAccessBlocks().isEmpty()){</span>
+<span class="nc" id="L141">                checkHint = 0;</span>
+            }
+<span class="nc bnc" id="L143" title="All 2 branches missed.">            for (Block block : accessBlocks) {</span>
+<span class="nc bnc" id="L144" title="All 4 branches missed.">                if (block.getCoordinate().getX() == coordinate.getX() &amp;&amp; block.getCoordinate().getY() == coordinate.getY()) {</span>
+<span class="nc" id="L145">                    move(coordinate);</span>
+<span class="nc" id="L146">                    return;</span>
+                }
+<span class="nc" id="L148">            }</span>
+<span class="nc" id="L149">            Piece piece = board[coordinate.getX()][coordinate.getY()];</span>
+<span class="nc bnc" id="L150" title="All 2 branches missed.">            if (piece == null) {</span>
+<span class="nc" id="L151">                selectedPiece = null;</span>
+<span class="nc bnc" id="L152" title="All 2 branches missed.">                if(isMyKingChecked()){</span>
+<span class="nc" id="L153">                    checkHint = 0;</span>
+                }
+<span class="nc" id="L155">                return;</span>
+            }
+<span class="nc bnc" id="L157" title="All 2 branches missed.">            if (piece.equals(selectedPiece)) {</span>
+<span class="nc" id="L158">                selectedPiece = null;</span>
+<span class="nc bnc" id="L159" title="All 2 branches missed.">                if(isMyKingChecked()){</span>
+<span class="nc" id="L160">                    checkHint = 0;</span>
+                }
+<span class="nc" id="L162">                return;</span>
+            }
+<span class="nc bnc" id="L164" title="All 4 branches missed.">            if (turns == playerHandle &amp;&amp; piece.owner == playerHandle) {</span>
+<span class="nc" id="L165">                selectedPiece = piece;</span>
+<span class="nc bnc" id="L166" title="All 4 branches missed.">                if(isMyKingChecked() &amp;&amp; getAccessBlocks().isEmpty()){</span>
+<span class="nc" id="L167">                    checkHint = 0;</span>
+                }
+            }
+        }
+
+<span class="nc" id="L172">    }</span>
+
+<span class="nc" id="L174">    private boolean isMove = false;</span>
+
+    public boolean isMoved() {
+<span class="nc" id="L177">        boolean res = isMove;</span>
+<span class="nc" id="L178">        isMove = false;</span>
+<span class="nc" id="L179">        return res;</span>
+    }
+
+
+    public void move(Coordinate target) {
+<span class="nc" id="L184">        prevStep.clear();</span>
+<span class="nc" id="L185">        prevStep.add(new Block(LIGHT_GREEN, target));</span>
+<span class="nc" id="L186">        prevStep.add(new Block(LIGHT_GREEN, selectedPiece.coordinate));</span>
+
+        // Pawn promotion
+<span class="nc bnc" id="L189" title="All 4 branches missed.">        if (selectedPiece.toChar() == 'p' &amp;&amp; target.getY() &lt; 7) {</span>
+<span class="nc" id="L190">            selectedPiece = new Queen(turns, selectedPiece.coordinate);</span>
+        }
+
+<span class="nc bnc" id="L193" title="All 4 branches missed.">        if (selectedPiece.toChar() == 'P' &amp;&amp; target.getY() &gt; 6) {</span>
+<span class="nc" id="L194">            selectedPiece = new Queen(turns, selectedPiece.coordinate);</span>
+        }
+
+        // Castling
+<span class="nc bnc" id="L198" title="All 4 branches missed.">        if (selectedPiece instanceof King &amp;&amp; selectedPiece.getCoordinate().getX() - target.getX() == 2) {</span>
+            // Move Rook
+<span class="nc" id="L200">            Rook rook = (Rook) getPieceAt(new Coordinate(0, selectedPiece.coordinate.getY()));</span>
+<span class="nc" id="L201">            board[target.getX()][target.getY()] = selectedPiece;</span>
+<span class="nc" id="L202">            board[selectedPiece.getCoordinate().getX()][selectedPiece.getCoordinate().getY()] = null;</span>
+<span class="nc" id="L203">            selectedPiece.setCoordinate(target);</span>
+<span class="nc" id="L204">            selectedPiece = null;</span>
+<span class="nc" id="L205">            board[rook.getCoordinate().getX()][rook.getCoordinate().getY()] = null;</span>
+<span class="nc" id="L206">            board[target.getX() + 1][target.getY()] = rook;</span>
+<span class="nc" id="L207">            rook.setCoordinate(new Coordinate(target.getX() + 1,target.getY()));</span>
+
+
+<span class="nc bnc" id="L210" title="All 4 branches missed.">        } else if (selectedPiece instanceof King &amp;&amp; selectedPiece.getCoordinate().getX() - target.getX() == -2) {</span>
+            // Move Rook
+<span class="nc" id="L212">            Rook rook = (Rook) getPieceAt(new Coordinate(BOARD_SIZE - 1, selectedPiece.coordinate.getY()));</span>
+<span class="nc" id="L213">            board[target.getX()][target.getY()] = selectedPiece;</span>
+<span class="nc" id="L214">            board[selectedPiece.getCoordinate().getX()][selectedPiece.getCoordinate().getY()] = null;</span>
+<span class="nc" id="L215">            selectedPiece.setCoordinate(target);</span>
+<span class="nc" id="L216">            selectedPiece = null;</span>
+<span class="nc" id="L217">            board[rook.getCoordinate().getX()][rook.getCoordinate().getY()] = null;</span>
+<span class="nc" id="L218">            board[target.getX() - 1][target.getY()] = rook;</span>
+<span class="nc" id="L219">            rook.setCoordinate(new Coordinate(target.getX() - 1,target.getY()));</span>
+
+<span class="nc" id="L221">        } else {</span>
+<span class="nc" id="L222">            board[target.getX()][target.getY()] = selectedPiece;</span>
+<span class="nc" id="L223">            board[selectedPiece.getCoordinate().getX()][selectedPiece.getCoordinate().getY()] = null;</span>
+<span class="nc" id="L224">            selectedPiece.setCoordinate(target);</span>
+<span class="nc" id="L225">            selectedPiece = null;</span>
+        }
+
+        // afterMove
+<span class="nc" id="L229">        nextPlayer();</span>
+<span class="nc" id="L230">        isMove = true;</span>
+<span class="nc" id="L231">    }</span>
+
+    public void AIMove() {
+<span class="nc" id="L234">        Map&lt;Piece, ArrayList&lt;Block&gt;&gt; moveMap = new HashMap&lt;&gt;();</span>
+<span class="nc bnc" id="L235" title="All 2 branches missed.">        for (int i = 0; i &lt; BOARD_SIZE; i++) {</span>
+<span class="nc bnc" id="L236" title="All 2 branches missed.">            for (int j = 0; j &lt; BOARD_SIZE; j++) {</span>
+<span class="nc bnc" id="L237" title="All 4 branches missed.">                if (board[i][j] != null &amp;&amp; board[i][j].owner == turns) {</span>
+<span class="nc" id="L238">                    selectedPiece = board[i][j];</span>
+<span class="nc" id="L239">                    ArrayList&lt;Block&gt; moveAbleBlocks = getAccessBlocks();</span>
+<span class="nc bnc" id="L240" title="All 2 branches missed.">                    if (!moveAbleBlocks.isEmpty())</span>
+<span class="nc" id="L241">                        moveMap.put(board[i][j], moveAbleBlocks);</span>
+                }
+            }
+        }
+
+        // Move
+<span class="nc" id="L247">        Random random = new Random();</span>
+<span class="nc bnc" id="L248" title="All 2 branches missed.">        if (!moveMap.isEmpty()) {</span>
+            // Select a random piece from the keySet
+<span class="nc" id="L250">            List&lt;Piece&gt; pieces = new ArrayList&lt;&gt;(moveMap.keySet());</span>
+<span class="nc" id="L251">            Piece randomPiece = pieces.get(random.nextInt(pieces.size()));</span>
+
+            // Select a random position from the list of moveable positions of the selected piece
+<span class="nc" id="L254">            List&lt;Block&gt; targets = moveMap.get(randomPiece);</span>
+<span class="nc" id="L255">            Block randomTarget = targets.get(random.nextInt(targets.size()));</span>
+
+            // Perform a move operation
+<span class="nc" id="L258">            selectedPiece = randomPiece;</span>
+<span class="nc" id="L259">            move(randomTarget.getCoordinate());</span>
+<span class="nc" id="L260">        } else {</span>
+<span class="nc bnc" id="L261" title="All 2 branches missed.">            if (isMyKingChecked()) {</span>
+<span class="nc bnc" id="L262" title="All 2 branches missed.">                if (this.turns == Owner.BLACK) {</span>
+<span class="nc" id="L263">                    winner = Owner.WHITE;</span>
+                } else {
+<span class="nc" id="L265">                    winner = Owner.BLACK;</span>
+                }
+<span class="nc" id="L267">                gameStatus = GAME_STATUS.GAME_OVER;</span>
+            } else {
+<span class="nc" id="L269">                gameStatus = GAME_STATUS.NO_WIN;</span>
+            }
+        }
+<span class="nc" id="L272">        isMove = true;</span>
+
+
+        // After Move check player can move
+<span class="nc" id="L276">        Map&lt;Piece, ArrayList&lt;Block&gt;&gt; playerMoveMap = new HashMap&lt;&gt;();</span>
+<span class="nc bnc" id="L277" title="All 2 branches missed.">        for (int i = 0; i &lt; BOARD_SIZE; i++) {</span>
+<span class="nc bnc" id="L278" title="All 2 branches missed.">            for (int j = 0; j &lt; BOARD_SIZE; j++) {</span>
+<span class="nc bnc" id="L279" title="All 4 branches missed.">                if (board[i][j] != null &amp;&amp; board[i][j].owner == turns) {</span>
+<span class="nc" id="L280">                    selectedPiece = board[i][j];</span>
+<span class="nc" id="L281">                    ArrayList&lt;Block&gt; moveAbleBlocks = getAccessBlocks();</span>
+<span class="nc bnc" id="L282" title="All 2 branches missed.">                    if (!moveAbleBlocks.isEmpty())</span>
+<span class="nc" id="L283">                        playerMoveMap.put(board[i][j], moveAbleBlocks);</span>
+                }
+            }
+        }
+<span class="nc bnc" id="L287" title="All 2 branches missed.">        if(playerMoveMap.isEmpty()){</span>
+<span class="nc bnc" id="L288" title="All 2 branches missed.">            if (isMyKingChecked()) {</span>
+<span class="nc bnc" id="L289" title="All 2 branches missed.">                if (this.turns == Owner.BLACK) {</span>
+<span class="nc" id="L290">                    winner = Owner.WHITE;</span>
+                } else {
+<span class="nc" id="L292">                    winner = Owner.BLACK;</span>
+                }
+<span class="nc" id="L294">                gameStatus = GAME_STATUS.GAME_OVER;</span>
+            } else {
+<span class="nc" id="L296">                gameStatus = GAME_STATUS.NO_WIN;</span>
+            }
+        }
+<span class="nc" id="L299">        selectedPiece = null;</span>
+
+<span class="nc" id="L301">    }</span>
+
+    private void nextPlayer() {
+<span class="nc bnc" id="L304" title="All 2 branches missed.">        if (this.turns == Owner.BLACK) {</span>
+<span class="nc" id="L305">            this.timeBlack += timeBlackIncrement;</span>
+<span class="nc" id="L306">            turns = Owner.WHITE;</span>
+        } else {
+<span class="nc" id="L308">            this.timeWhite += timeWhiteIncrement;</span>
+<span class="nc" id="L309">            turns = Owner.BLACK;</span>
+        }
+<span class="nc" id="L311">    }</span>
+
+    public ArrayList&lt;Block&gt; getBlocks() {
+<span class="nc" id="L314">        ArrayList&lt;Block&gt; res = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L315">        res.addAll(prevStep);</span>
+<span class="nc bnc" id="L316" title="All 2 branches missed.">        if (selectedPiece != null) {</span>
+<span class="nc" id="L317">            res.add(new Block(GREEN, selectedPiece.coordinate));</span>
+<span class="nc" id="L318">            res.addAll(getAccessBlocks());</span>
+        }
+<span class="nc bnc" id="L320" title="All 2 branches missed.">        if (isOtherKingChecked()) {</span>
+<span class="nc" id="L321">            res.add(new Block(RED, getOtherPlayerKing().coordinate));</span>
+        }
+<span class="nc bnc" id="L323" title="All 2 branches missed.">        if(isMyKingChecked()){</span>
+<span class="nc" id="L324">            res.add(new Block(RED, getCurrentPlayerKing().coordinate));</span>
+        }
+
+        // Hint
+<span class="nc bnc" id="L328" title="All 2 branches missed.">        if(checkHint &gt;= 0){</span>
+<span class="nc bnc" id="L329" title="All 2 branches missed.">            if(checkHint % 60 &gt; 30){</span>
+<span class="nc" id="L330">                res.add(new Block(BROWN,getCurrentPlayerKing().coordinate));</span>
+            }else {
+<span class="nc" id="L332">                res.add(new Block(RED,getCurrentPlayerKing().coordinate));</span>
+            }
+<span class="nc" id="L334">            checkHint ++ ;</span>
+<span class="nc bnc" id="L335" title="All 2 branches missed.">            if(checkHint &gt; 180){</span>
+<span class="nc" id="L336">                checkHint = -1;</span>
+            }
+        }
+<span class="nc" id="L339">        return res;</span>
+    }
+
+    private King getOtherPlayerKing() {
+<span class="nc bnc" id="L343" title="All 2 branches missed.">        for (King king : kings) {</span>
+<span class="nc bnc" id="L344" title="All 2 branches missed.">            if (king.owner != turns) {</span>
+<span class="nc" id="L345">                return king;</span>
+            }
+<span class="nc" id="L347">        }</span>
+<span class="nc" id="L348">        throw new IllegalStateException();</span>
+    }
+
+    private void processDirection(int x, int y, Function&lt;Integer, Coordinate&gt; direction, ArrayList&lt;Block&gt; res) {
+<span class="nc bnc" id="L352" title="All 2 branches missed.">        for (int i = 1; i &lt; BOARD_SIZE; i++) {</span>
+<span class="nc" id="L353">            Coordinate newCoordinate = direction.apply(i);</span>
+<span class="nc" id="L354">            int i_x = newCoordinate.getX();</span>
+<span class="nc" id="L355">            int i_y = newCoordinate.getY();</span>
+<span class="nc bnc" id="L356" title="All 8 branches missed.">            if (i_x &gt;= 0 &amp;&amp; i_x &lt; BOARD_SIZE &amp;&amp; i_y &gt;= 0 &amp;&amp; i_y &lt; BOARD_SIZE) {</span>
+<span class="nc bnc" id="L357" title="All 2 branches missed.">                if (isKingCheckedAfterMove(new Coordinate(i_x, i_y))) continue;</span>
+<span class="nc bnc" id="L358" title="All 2 branches missed.">                if (!isPathClear(selectedPiece.getCoordinate(), new Coordinate(i_x, i_y))) {</span>
+<span class="nc" id="L359">                    continue;</span>
+                }
+<span class="nc bnc" id="L361" title="All 2 branches missed.">                if (board[i_x][i_y] == null) {</span>
+<span class="nc" id="L362">                    res.add(new Block(BLUE, new Coordinate(i_x, i_y)));</span>
+                } else {
+<span class="nc bnc" id="L364" title="All 2 branches missed.">                    if (board[i_x][i_y].owner != turns) {</span>
+<span class="nc" id="L365">                        res.add(new Block(LIGHT_RED, new Coordinate(i_x, i_y)));</span>
+                    }
+                    break;
+                }
+            } else {
+                break;
+            }
+        }
+<span class="nc" id="L373">    }</span>
+
+
+    public ArrayList&lt;Block&gt; getAccessBlocks() {
+<span class="nc" id="L377">        ArrayList&lt;Block&gt; res = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L378">        int x = selectedPiece.coordinate.getX();</span>
+<span class="nc" id="L379">        int y = selectedPiece.coordinate.getY();</span>
+<span class="nc bnc" id="L380" title="All 2 branches missed.">        if (selectedPiece != null) {</span>
+<span class="nc bnc" id="L381" title="All 13 branches missed.">            switch (selectedPiece.toChar()) {</span>
+                case 'p': {
+                    // One step
+<span class="nc bnc" id="L384" title="All 2 branches missed.">                    if (y &gt; 0) {</span>
+                        // One step
+<span class="nc bnc" id="L386" title="All 2 branches missed.">                        if (board[x][y - 1] == null) {</span>
+<span class="nc bnc" id="L387" title="All 2 branches missed.">                            if (isKingCheckedAfterMove(new Coordinate(x, y - 1))) break;</span>
+<span class="nc" id="L388">                            res.add(new Block(BLUE, new Coordinate(x, y - 1)));</span>
+                        }
+                        // 2 step
+<span class="nc bnc" id="L391" title="All 6 branches missed.">                        if (y == BOARD_SIZE - 2 &amp;&amp; board[x][y - 1] == null &amp;&amp; board[x][y - 2] == null) {</span>
+<span class="nc bnc" id="L392" title="All 2 branches missed.">                            if (isKingCheckedAfterMove(new Coordinate(x, y - 2))) break;</span>
+<span class="nc" id="L393">                            res.add(new Block(BLUE, new Coordinate(x, y - 2)));</span>
+                        }
+                        // eat step
+<span class="nc bnc" id="L396" title="All 6 branches missed.">                        if (x &gt; 0 &amp;&amp; board[x - 1][y - 1] != null &amp;&amp; board[x - 1][y - 1].owner != turns) {</span>
+<span class="nc" id="L397">                            res.add(new Block(LIGHT_RED, new Coordinate(x - 1, y - 1)));</span>
+                        }
+<span class="nc bnc" id="L399" title="All 6 branches missed.">                        if (x &lt; BOARD_SIZE - 1 &amp;&amp; board[x + 1][y - 1] != null &amp;&amp; board[x + 1][y - 1].owner != turns) {</span>
+<span class="nc" id="L400">                            res.add(new Block(LIGHT_RED, new Coordinate(x + 1, y - 1)));</span>
+                        }
+                    }
+                    break;
+                }
+                case 'P': {
+                    // One step
+<span class="nc bnc" id="L407" title="All 2 branches missed.">                    if (y &lt; BOARD_SIZE - 1) {</span>
+                        // One step
+<span class="nc bnc" id="L409" title="All 2 branches missed.">                        if (board[x][y + 1] == null) {</span>
+<span class="nc bnc" id="L410" title="All 2 branches missed.">                            if (isKingCheckedAfterMove(new Coordinate(x, y + 1))) break;</span>
+<span class="nc" id="L411">                            res.add(new Block(BLUE, new Coordinate(x, y + 1)));</span>
+                        }
+                        // 2 step
+<span class="nc bnc" id="L414" title="All 6 branches missed.">                        if (y == 1 &amp;&amp; board[x][y + 1] == null &amp;&amp; board[x][y + 2] == null) {</span>
+<span class="nc bnc" id="L415" title="All 2 branches missed.">                            if (isKingCheckedAfterMove(new Coordinate(x, y + 2))) break;</span>
+<span class="nc" id="L416">                            res.add(new Block(BLUE, new Coordinate(x, y + 2)));</span>
+                        }
+                        // eat step
+<span class="nc bnc" id="L419" title="All 6 branches missed.">                        if (x &gt; 0 &amp;&amp; board[x - 1][y + 1] != null &amp;&amp; board[x - 1][y + 1].owner != turns) {</span>
+<span class="nc" id="L420">                            res.add(new Block(LIGHT_RED, new Coordinate(x - 1, y + 1)));</span>
+                        }
+<span class="nc bnc" id="L422" title="All 6 branches missed.">                        if (x &lt; BOARD_SIZE - 1 &amp;&amp; board[x + 1][y + 1] != null &amp;&amp; board[x + 1][y + 1].owner != turns) {</span>
+<span class="nc" id="L423">                            res.add(new Block(LIGHT_RED, new Coordinate(x + 1, y + 1)));</span>
+                        }
+                    }
+                    break;
+                }
+                case 'R':
+                case 'r': {
+<span class="nc" id="L430">                    processDirection(x, y, i -&gt; new Coordinate(x, y - i), res); // Up</span>
+<span class="nc" id="L431">                    processDirection(x, y, i -&gt; new Coordinate(x, y + i), res); // Down</span>
+<span class="nc" id="L432">                    processDirection(x, y, i -&gt; new Coordinate(x - i, y), res); // Left</span>
+<span class="nc" id="L433">                    processDirection(x, y, i -&gt; new Coordinate(x + i, y), res); // Right</span>
+<span class="nc" id="L434">                    break;</span>
+                }
+                case 'N':
+                case 'n': {
+<span class="nc" id="L438">                    int[][] dirs = {{-2, -1}, {-2, 1}, {-1, -2}, {-1, 2}, {1, -2}, {1, 2}, {2, -1}, {2, 1}};</span>
+<span class="nc bnc" id="L439" title="All 2 branches missed.">                    for (int[] dir : dirs) {</span>
+<span class="nc" id="L440">                        int i_x = x + dir[0];</span>
+<span class="nc" id="L441">                        int i_y = y + dir[1];</span>
+<span class="nc bnc" id="L442" title="All 8 branches missed.">                        if (i_x &gt;= 0 &amp;&amp; i_x &lt; BOARD_SIZE &amp;&amp; i_y &gt;= 0 &amp;&amp; i_y &lt; BOARD_SIZE) {</span>
+<span class="nc bnc" id="L443" title="All 2 branches missed.">                            if (isKingCheckedAfterMove(new Coordinate(i_x, i_y))) continue;</span>
+<span class="nc bnc" id="L444" title="All 2 branches missed.">                            if (board[i_x][i_y] == null) {</span>
+<span class="nc" id="L445">                                res.add(new Block(BLUE, new Coordinate(i_x, i_y)));</span>
+                            } else {
+<span class="nc bnc" id="L447" title="All 2 branches missed.">                                if (board[i_x][i_y].owner != turns) {</span>
+<span class="nc" id="L448">                                    res.add(new Block(LIGHT_RED, new Coordinate(i_x, i_y)));</span>
+                                }
+                            }
+                        }
+                    }
+<span class="nc" id="L453">                    break;</span>
+                }
+                case 'B':
+                case 'b': {
+<span class="nc" id="L457">                    processDirection(x, y, i -&gt; new Coordinate(x - i, y - i), res); // Upper left</span>
+<span class="nc" id="L458">                    processDirection(x, y, i -&gt; new Coordinate(x + i, y - i), res); // Upper right</span>
+<span class="nc" id="L459">                    processDirection(x, y, i -&gt; new Coordinate(x - i, y + i), res); // Lower left</span>
+<span class="nc" id="L460">                    processDirection(x, y, i -&gt; new Coordinate(x + i, y + i), res); // Lower right</span>
+<span class="nc" id="L461">                    break;</span>
+                }
+                case 'k': // King
+                case 'K': // King
+                {
+<span class="nc" id="L466">                    int[][] dirs = {{-1, -1}, {-1, 0}, {-1, 1}, {0, -1}, {0, 1}, {1, -1}, {1, 0}, {1, 1}};</span>
+<span class="nc bnc" id="L467" title="All 2 branches missed.">                    for (int[] dir : dirs) {</span>
+<span class="nc" id="L468">                        int i_x = x + dir[0];</span>
+<span class="nc" id="L469">                        int i_y = y + dir[1];</span>
+<span class="nc bnc" id="L470" title="All 8 branches missed.">                        if (i_x &gt;= 0 &amp;&amp; i_x &lt; BOARD_SIZE &amp;&amp; i_y &gt;= 0 &amp;&amp; i_y &lt; BOARD_SIZE) {</span>
+<span class="nc bnc" id="L471" title="All 2 branches missed.">                            if (isKingCheckedAfterMove(new Coordinate(i_x, i_y))) continue;</span>
+<span class="nc bnc" id="L472" title="All 2 branches missed.">                            if (board[i_x][i_y] == null) {</span>
+<span class="nc" id="L473">                                res.add(new Block(BLUE, new Coordinate(i_x, i_y)));</span>
+<span class="nc bnc" id="L474" title="All 2 branches missed.">                            } else if (board[i_x][i_y].owner != turns) {</span>
+<span class="nc" id="L475">                                res.add(new Block(LIGHT_RED, new Coordinate(i_x, i_y)));</span>
+                            }
+                        }
+                    }
+
+                    // castling
+<span class="nc bnc" id="L481" title="All 2 branches missed.">                    if (!((King) selectedPiece).haveBeenMove) {</span>
+                        // find rook
+<span class="nc" id="L483">                        Rook rook1 = (Rook) getPieceAt(new Coordinate(0, ((King) selectedPiece).getCoordinate().getY()));</span>
+<span class="nc" id="L484">                        Rook rook2 = (Rook) getPieceAt(new Coordinate(BOARD_SIZE - 1, ((King) selectedPiece).getCoordinate().getY()));</span>
+<span class="nc bnc" id="L485" title="All 6 branches missed.">                        if (rook1 != null &amp;&amp; !rook1.haveBeenMove &amp;&amp; isPathClear(((King) selectedPiece).coordinate, rook1.coordinate)) {</span>
+<span class="nc" id="L486">                            res.add(new Block(BLUE, new Coordinate(selectedPiece.coordinate.getX() - 2, selectedPiece.coordinate.getY())));</span>
+                        }
+<span class="nc bnc" id="L488" title="All 6 branches missed.">                        if (rook2 != null &amp;&amp; !rook2.haveBeenMove &amp;&amp; isPathClear(((King) selectedPiece).coordinate, rook2.coordinate)) {</span>
+<span class="nc" id="L489">                            res.add(new Block(BLUE, new Coordinate(selectedPiece.coordinate.getX() + 2, selectedPiece.coordinate.getY())));</span>
+                        }
+<span class="nc" id="L491">                    }</span>
+                    break;
+                }
+                case 'h': // Archbishop
+                case 'H': // Archbishop
+                {
+                    // Like Knight
+<span class="nc" id="L498">                    int[][] knightDirs = {{-2, -1}, {-2, 1}, {-1, -2}, {-1, 2}, {1, -2}, {1, 2}, {2, -1}, {2, 1}};</span>
+<span class="nc bnc" id="L499" title="All 2 branches missed.">                    for (int[] dir : knightDirs) {</span>
+<span class="nc" id="L500">                        int i_x = x + dir[0];</span>
+<span class="nc" id="L501">                        int i_y = y + dir[1];</span>
+<span class="nc bnc" id="L502" title="All 8 branches missed.">                        if (i_x &gt;= 0 &amp;&amp; i_x &lt; BOARD_SIZE &amp;&amp; i_y &gt;= 0 &amp;&amp; i_y &lt; BOARD_SIZE) {</span>
+<span class="nc bnc" id="L503" title="All 2 branches missed.">                            if (isKingCheckedAfterMove(new Coordinate(i_x, i_y))) continue;</span>
+<span class="nc bnc" id="L504" title="All 2 branches missed.">                            if (board[i_x][i_y] == null) {</span>
+<span class="nc" id="L505">                                res.add(new Block(BLUE, new Coordinate(i_x, i_y)));</span>
+<span class="nc bnc" id="L506" title="All 2 branches missed.">                            } else if (board[i_x][i_y].owner != turns) {</span>
+<span class="nc" id="L507">                                res.add(new Block(LIGHT_RED, new Coordinate(i_x, i_y)));</span>
+                            }
+                        }
+                    }
+
+                    // Like Bishop
+<span class="nc" id="L513">                    processDirection(x, y, i -&gt; new Coordinate(x - i, y - i), res); // Upper left</span>
+<span class="nc" id="L514">                    processDirection(x, y, i -&gt; new Coordinate(x + i, y - i), res); // Upper right</span>
+<span class="nc" id="L515">                    processDirection(x, y, i -&gt; new Coordinate(x - i, y + i), res); // Lower left</span>
+<span class="nc" id="L516">                    processDirection(x, y, i -&gt; new Coordinate(x + i, y + i), res); // Lower right</span>
+
+<span class="nc" id="L518">                    break;</span>
+                }
+                case 'c': // Camel
+                case 'C': // Camel
+                {
+<span class="nc" id="L523">                    int[][] camelDirs = {{-3, -1}, {-3, 1}, {-1, -3}, {-1, 3}, {1, -3}, {1, 3}, {3, -1}, {3, 1}};</span>
+<span class="nc bnc" id="L524" title="All 2 branches missed.">                    for (int[] dir : camelDirs) {</span>
+<span class="nc" id="L525">                        int i_x = x + dir[0];</span>
+<span class="nc" id="L526">                        int i_y = y + dir[1];</span>
+<span class="nc bnc" id="L527" title="All 8 branches missed.">                        if (i_x &gt;= 0 &amp;&amp; i_x &lt; BOARD_SIZE &amp;&amp; i_y &gt;= 0 &amp;&amp; i_y &lt; BOARD_SIZE) {</span>
+<span class="nc bnc" id="L528" title="All 2 branches missed.">                            if (isKingCheckedAfterMove(new Coordinate(i_x, i_y))) continue;</span>
+<span class="nc bnc" id="L529" title="All 2 branches missed.">                            if (board[i_x][i_y] == null) {</span>
+<span class="nc" id="L530">                                res.add(new Block(BLUE, new Coordinate(i_x, i_y)));</span>
+<span class="nc bnc" id="L531" title="All 2 branches missed.">                            } else if (board[i_x][i_y].owner != turns) {</span>
+<span class="nc" id="L532">                                res.add(new Block(LIGHT_RED, new Coordinate(i_x, i_y)));</span>
+                            }
+                        }
+                    }
+<span class="nc" id="L536">                    break;</span>
+                }
+                case 'g': // General/Guard
+                case 'G': // General/Guard
+                {
+                    // Like Knight
+<span class="nc" id="L542">                    int[][] knightDirs = {{-2, -1}, {-2, 1}, {-1, -2}, {-1, 2}, {1, -2}, {1, 2}, {2, -1}, {2, 1}};</span>
+<span class="nc bnc" id="L543" title="All 2 branches missed.">                    for (int[] dir : knightDirs) {</span>
+<span class="nc" id="L544">                        int i_x = x + dir[0];</span>
+<span class="nc" id="L545">                        int i_y = y + dir[1];</span>
+<span class="nc bnc" id="L546" title="All 8 branches missed.">                        if (i_x &gt;= 0 &amp;&amp; i_x &lt; BOARD_SIZE &amp;&amp; i_y &gt;= 0 &amp;&amp; i_y &lt; BOARD_SIZE) {</span>
+<span class="nc bnc" id="L547" title="All 2 branches missed.">                            if (isKingCheckedAfterMove(new Coordinate(i_x, i_y))) continue;</span>
+<span class="nc bnc" id="L548" title="All 2 branches missed.">                            if (board[i_x][i_y] == null) {</span>
+<span class="nc" id="L549">                                res.add(new Block(BLUE, new Coordinate(i_x, i_y)));</span>
+<span class="nc bnc" id="L550" title="All 2 branches missed.">                            } else if (board[i_x][i_y].owner != turns) {</span>
+<span class="nc" id="L551">                                res.add(new Block(LIGHT_RED, new Coordinate(i_x, i_y)));</span>
+                            }
+                        }
+                    }
+
+                    // Like King
+<span class="nc" id="L557">                    int[][] kingDirs = {{-1, -1}, {-1, 0}, {-1, 1}, {0, -1}, {0, 1}, {1, -1}, {1, 0}, {1, 1}};</span>
+<span class="nc bnc" id="L558" title="All 2 branches missed.">                    for (int[] dir : kingDirs) {</span>
+<span class="nc" id="L559">                        int i_x = x + dir[0];</span>
+<span class="nc" id="L560">                        int i_y = y + dir[1];</span>
+<span class="nc bnc" id="L561" title="All 8 branches missed.">                        if (i_x &gt;= 0 &amp;&amp; i_x &lt; BOARD_SIZE &amp;&amp; i_y &gt;= 0 &amp;&amp; i_y &lt; BOARD_SIZE) {</span>
+<span class="nc bnc" id="L562" title="All 2 branches missed.">                            if (isKingCheckedAfterMove(new Coordinate(i_x, i_y))) continue;</span>
+<span class="nc bnc" id="L563" title="All 2 branches missed.">                            if (board[i_x][i_y] == null) {</span>
+<span class="nc" id="L564">                                res.add(new Block(BLUE, new Coordinate(i_x, i_y)));</span>
+<span class="nc bnc" id="L565" title="All 2 branches missed.">                            } else if (board[i_x][i_y].owner != turns) {</span>
+<span class="nc" id="L566">                                res.add(new Block(LIGHT_RED, new Coordinate(i_x, i_y)));</span>
+                            }
+                        }
+                    }
+<span class="nc" id="L570">                    break;</span>
+                }
+
+                case 'A': // Amazon
+                case 'a': // Amazon
+                {
+                    // Like Knight
+<span class="nc" id="L577">                    int[][] knightDirs = {{-2, -1}, {-2, 1}, {-1, -2}, {-1, 2}, {1, -2}, {1, 2}, {2, -1}, {2, 1}};</span>
+<span class="nc bnc" id="L578" title="All 2 branches missed.">                    for (int[] dir : knightDirs) {</span>
+<span class="nc" id="L579">                        int i_x = x + dir[0];</span>
+<span class="nc" id="L580">                        int i_y = y + dir[1];</span>
+<span class="nc bnc" id="L581" title="All 8 branches missed.">                        if (i_x &gt;= 0 &amp;&amp; i_x &lt; BOARD_SIZE &amp;&amp; i_y &gt;= 0 &amp;&amp; i_y &lt; BOARD_SIZE) {</span>
+<span class="nc bnc" id="L582" title="All 2 branches missed.">                            if (isKingCheckedAfterMove(new Coordinate(i_x, i_y))) continue;</span>
+<span class="nc bnc" id="L583" title="All 2 branches missed.">                            if (board[i_x][i_y] == null) {</span>
+<span class="nc" id="L584">                                res.add(new Block(BLUE, new Coordinate(i_x, i_y)));</span>
+<span class="nc bnc" id="L585" title="All 2 branches missed.">                            } else if (board[i_x][i_y].owner != turns) {</span>
+<span class="nc" id="L586">                                res.add(new Block(LIGHT_RED, new Coordinate(i_x, i_y)));</span>
+                            }
+                        }
+                    }
+
+                    // Like Bishop
+<span class="nc" id="L592">                    processDirection(x, y, i -&gt; new Coordinate(x - i, y - i), res); // Upper left</span>
+<span class="nc" id="L593">                    processDirection(x, y, i -&gt; new Coordinate(x + i, y - i), res); // Upper right</span>
+<span class="nc" id="L594">                    processDirection(x, y, i -&gt; new Coordinate(x - i, y + i), res); // Lower left</span>
+<span class="nc" id="L595">                    processDirection(x, y, i -&gt; new Coordinate(x + i, y + i), res); // Lower right</span>
+
+                    // Like Rook
+<span class="nc" id="L598">                    processDirection(x, y, i -&gt; new Coordinate(x, y - i), res); // Up</span>
+<span class="nc" id="L599">                    processDirection(x, y, i -&gt; new Coordinate(x, y + i), res); // Down</span>
+<span class="nc" id="L600">                    processDirection(x, y, i -&gt; new Coordinate(x - i, y), res); // Left</span>
+<span class="nc" id="L601">                    processDirection(x, y, i -&gt; new Coordinate(x + i, y), res); // Right</span>
+
+<span class="nc" id="L603">                    break;</span>
+                }
+                case 'e': // Chancellor
+                case 'E': // Chancellor
+                {
+                    // Like Knight
+<span class="nc" id="L609">                    int[][] knightDirs = {{-2, -1}, {-2, 1}, {-1, -2}, {-1, 2}, {1, -2}, {1, 2}, {2, -1}, {2, 1}};</span>
+<span class="nc bnc" id="L610" title="All 2 branches missed.">                    for (int[] dir : knightDirs) {</span>
+<span class="nc" id="L611">                        int i_x = x + dir[0];</span>
+<span class="nc" id="L612">                        int i_y = y + dir[1];</span>
+<span class="nc bnc" id="L613" title="All 8 branches missed.">                        if (i_x &gt;= 0 &amp;&amp; i_x &lt; BOARD_SIZE &amp;&amp; i_y &gt;= 0 &amp;&amp; i_y &lt; BOARD_SIZE) {</span>
+<span class="nc bnc" id="L614" title="All 2 branches missed.">                            if (isKingCheckedAfterMove(new Coordinate(i_x, i_y))) continue;</span>
+<span class="nc bnc" id="L615" title="All 2 branches missed.">                            if (board[i_x][i_y] == null) {</span>
+<span class="nc" id="L616">                                res.add(new Block(BLUE, new Coordinate(i_x, i_y)));</span>
+<span class="nc bnc" id="L617" title="All 2 branches missed.">                            } else if (board[i_x][i_y].owner != turns) {</span>
+<span class="nc" id="L618">                                res.add(new Block(LIGHT_RED, new Coordinate(i_x, i_y)));</span>
+                            }
+                        }
+                    }
+
+                    // Like Rook
+<span class="nc" id="L624">                    processDirection(x, y, i -&gt; new Coordinate(x, y - i), res); // Up</span>
+<span class="nc" id="L625">                    processDirection(x, y, i -&gt; new Coordinate(x, y + i), res); // Down</span>
+<span class="nc" id="L626">                    processDirection(x, y, i -&gt; new Coordinate(x - i, y), res); // Left</span>
+<span class="nc" id="L627">                    processDirection(x, y, i -&gt; new Coordinate(x + i, y), res); // Right</span>
+
+<span class="nc" id="L629">                    break;</span>
+                }
+                case 'q': // Queen
+                case 'Q': // Queen
+                {
+                    // Like Bishop
+<span class="nc" id="L635">                    processDirection(x, y, i -&gt; new Coordinate(x - i, y - i), res); // Upper left</span>
+<span class="nc" id="L636">                    processDirection(x, y, i -&gt; new Coordinate(x + i, y - i), res); // Upper right</span>
+<span class="nc" id="L637">                    processDirection(x, y, i -&gt; new Coordinate(x - i, y + i), res); // Lower left</span>
+<span class="nc" id="L638">                    processDirection(x, y, i -&gt; new Coordinate(x + i, y + i), res); // Lower right</span>
+
+                    // Like Rook
+<span class="nc" id="L641">                    processDirection(x, y, i -&gt; new Coordinate(x, y - i), res); // Up</span>
+<span class="nc" id="L642">                    processDirection(x, y, i -&gt; new Coordinate(x, y + i), res); // Down</span>
+<span class="nc" id="L643">                    processDirection(x, y, i -&gt; new Coordinate(x - i, y), res); // Left</span>
+<span class="nc" id="L644">                    processDirection(x, y, i -&gt; new Coordinate(x + i, y), res); // Right</span>
+
+                    break;
+                }
+
+
+            }
+        }
+<span class="nc" id="L652">        return res;</span>
+    }
+
+    public Piece getPieceAt(Coordinate coordinate) {
+<span class="nc" id="L656">        return board[coordinate.getX()][coordinate.getY()];</span>
+    }
+
+    public boolean isPathClear(Coordinate start, Coordinate end) {
+
+<span class="nc" id="L661">        int startX = start.getX();</span>
+<span class="nc" id="L662">        int startY = start.getY();</span>
+<span class="nc" id="L663">        int endX = end.getX();</span>
+<span class="nc" id="L664">        int endY = end.getY();</span>
+
+<span class="nc" id="L666">        int dx = Integer.compare(endX, startX);</span>
+<span class="nc" id="L667">        int dy = Integer.compare(endY, startY);</span>
+
+        // Start from the next square after 'start'
+<span class="nc" id="L670">        startX += dx;</span>
+<span class="nc" id="L671">        startY += dy;</span>
+
+<span class="nc bnc" id="L673" title="All 4 branches missed.">        while (startX != endX || startY != endY) {</span>
+<span class="nc bnc" id="L674" title="All 2 branches missed.">            if (getPieceAt(new Coordinate(startX, startY)) != null) {</span>
+                // Found a piece in the path
+<span class="nc" id="L676">                return false;</span>
+            }
+
+<span class="nc" id="L679">            startX += dx;</span>
+<span class="nc" id="L680">            startY += dy;</span>
+        }
+
+        // No pieces found in the path
+<span class="nc" id="L684">        return true;</span>
+    }
+
+    public boolean isKingCheckedAfterMove(Coordinate target) {
+        // Create a copy of the board
+<span class="nc" id="L689">        Board tempBoard = new Board(this);</span>
+
+<span class="nc" id="L691">        tempBoard.move(target);</span>
+<span class="nc" id="L692">        tempBoard.nextPlayer();</span>
+        // Check if the king is in check
+<span class="nc" id="L694">        return tempBoard.isMyKingChecked();</span>
+    }
+
+    public boolean isMyKingChecked() {
+<span class="nc" id="L698">        King myKing = getCurrentPlayerKing();</span>
+<span class="nc bnc" id="L699" title="All 2 branches missed.">        for (int i = 0; i &lt; BOARD_SIZE; i++) {</span>
+<span class="nc bnc" id="L700" title="All 2 branches missed.">            for (int j = 0; j &lt; BOARD_SIZE; j++) {</span>
+<span class="nc" id="L701">                Piece piece = board[i][j];</span>
+<span class="nc bnc" id="L702" title="All 2 branches missed.">                if (piece == null) continue;</span>
+<span class="nc bnc" id="L703" title="All 2 branches missed.">                if (piece.owner != this.turns) {</span>
+<span class="nc bnc" id="L704" title="All 2 branches missed.">                    if (piece.canEat(this, myKing.coordinate)) {</span>
+<span class="nc" id="L705">                        return true;</span>
+                    }
+                }
+            }
+        }
+<span class="nc" id="L710">        return false;</span>
+    }
+
+    private King getCurrentPlayerKing() {
+<span class="nc bnc" id="L714" title="All 2 branches missed.">        for (King king : this.kings) {</span>
+<span class="nc bnc" id="L715" title="All 2 branches missed.">            if (king.owner == turns) {</span>
+<span class="nc" id="L716">                return king;</span>
+            }
+<span class="nc" id="L718">        }</span>
+<span class="nc" id="L719">        throw new IllegalStateException();</span>
+    }
+
+    public boolean isOtherKingChecked() {
+<span class="nc" id="L723">        King otherKing = getOtherPlayerKing();</span>
+<span class="nc bnc" id="L724" title="All 2 branches missed.">        for (int i = 0; i &lt; BOARD_SIZE; i++) {</span>
+<span class="nc bnc" id="L725" title="All 2 branches missed.">            for (int j = 0; j &lt; BOARD_SIZE; j++) {</span>
+<span class="nc" id="L726">                Piece piece = board[i][j];</span>
+<span class="nc bnc" id="L727" title="All 2 branches missed.">                if (piece == null) continue;</span>
+<span class="nc bnc" id="L728" title="All 2 branches missed.">                if (piece.owner != otherKing.owner) {</span>
+<span class="nc bnc" id="L729" title="All 2 branches missed.">                    if (piece.canEat(this, otherKing.coordinate)) {</span>
+<span class="nc" id="L730">                        return true;</span>
+                    }
+                }
+            }
+        }
+<span class="nc" id="L735">        return false;</span>
+    }
+
+    public ArrayList&lt;Block&gt; getContributeBlocks() {
+<span class="nc" id="L739">        ArrayList&lt;Block&gt; blocks = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L740">        King myKing = null;</span>
+<span class="nc bnc" id="L741" title="All 2 branches missed.">        for (King king : kings) {</span>
+<span class="nc bnc" id="L742" title="All 2 branches missed.">            if (king.getOwner() == turns) {</span>
+<span class="nc" id="L743">                myKing = king;</span>
+            }
+<span class="nc" id="L745">        }</span>
+
+<span class="nc bnc" id="L747" title="All 2 branches missed.">        if (myKing == null) {</span>
+<span class="nc" id="L748">            throw new IllegalStateException(&quot;The current player has no king.&quot;);</span>
+        }
+
+<span class="nc bnc" id="L751" title="All 2 branches missed.">        for (int i = 0; i &lt; BOARD_SIZE; i++) {</span>
+<span class="nc bnc" id="L752" title="All 2 branches missed.">            for (int j = 0; j &lt; BOARD_SIZE; j++) {</span>
+<span class="nc" id="L753">                Coordinate coordinate = new Coordinate(i, j);</span>
+<span class="nc" id="L754">                Piece piece = board[i][j];</span>
+
+<span class="nc bnc" id="L756" title="All 4 branches missed.">                if (piece != null &amp;&amp; piece.getOwner() != turns) {</span>
+                    // Threatens the king directly
+<span class="nc bnc" id="L758" title="All 2 branches missed.">                    if (piece.canEat(this, myKing.getCoordinate())) {</span>
+<span class="nc" id="L759">                        blocks.add(new Block(LIGHT_RED, coordinate));</span>
+                    }
+
+                    // Check all blocks around the king
+<span class="nc bnc" id="L763" title="All 2 branches missed.">                    for (Coordinate aroundKing : myKing.getSurroundingCoordinates()) {</span>
+                        // If this piece blocks the king's movement
+<span class="nc bnc" id="L765" title="All 2 branches missed.">                        if (piece.canEat(this, aroundKing)) {</span>
+<span class="nc" id="L766">                            blocks.add(new Block(LIGHT_RED, coordinate));</span>
+                        }
+<span class="nc" id="L768">                    }</span>
+                }
+            }
+        }
+
+<span class="nc" id="L773">        return blocks;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

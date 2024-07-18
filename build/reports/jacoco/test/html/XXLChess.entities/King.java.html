@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>King.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">xxlchess_scaffold8</a> &gt; <a href="index.source.html" class="el_package">XXLChess.entities</a> &gt; <span class="el_source">King.java</span></div><h1>King.java</h1><pre class="source lang-java linenums">package XXLChess.entities;
+
+import XXLChess.utils.Coordinate;
+
+import java.util.ArrayList;
+
+import static XXLChess.utils.Constants.BOARD_SIZE;
+
+/**
+ * The King class represents a King chess piece.
+ * A King can move one square in any direction (horizontally, vertically, or diagonally).
+ * The King's symbol is 'k' for white and 'K' for black.
+ */
+public class King extends Piece {
+<span class="nc" id="L15">    public boolean haveBeenMove = false;</span>
+
+    @Override
+    public void setCoordinate(Coordinate coordinate) {
+<span class="nc" id="L19">        this.haveBeenMove = true;</span>
+<span class="nc" id="L20">        super.setCoordinate(coordinate);</span>
+<span class="nc" id="L21">    }</span>
+
+    /**
+     * Constructor for creating a new instance of a King piece.
+     *
+     * @param owner      the Owner (BLACK/WHITE) of this piece.
+     * @param coordinate the initial Coordinate for this piece.
+     */
+    public King(Owner owner, Coordinate coordinate) {
+<span class="nc" id="L30">        super(owner, coordinate);</span>
+<span class="nc" id="L31">    }</span>
+
+    /**
+     * Returns the character symbol for this piece.
+     * The symbol is 'k' for a white King and 'K' for a black King.
+     *
+     * @return the character symbol for this piece.
+     */
+    @Override
+    public char toChar() {
+<span class="nc bnc" id="L41" title="All 2 branches missed.">        if(owner == Owner.BLACK){</span>
+<span class="nc" id="L42">            return 'K';</span>
+        }else {
+<span class="nc" id="L44">            return 'k';</span>
+        }
+    }
+
+    /**
+     * Determines if this King can move to a given target coordinate on a given board.
+     * The King can move one space in any direction.
+     *
+     * @param board  the Board on which to test the move.
+     * @param target the target Coordinate to move to.
+     * @return true if the move is valid, false otherwise.
+     */
+    @Override
+    public boolean canEat(Board board, Coordinate target) {
+<span class="nc" id="L58">        Coordinate current = this.coordinate; // Assuming a method to get current position of the piece</span>
+<span class="nc" id="L59">        int deltaX = Math.abs(current.getX() - target.getX());</span>
+<span class="nc" id="L60">        int deltaY = Math.abs(current.getY() - target.getY());</span>
+
+        // Check if the move is only one square in any direction
+<span class="nc bnc" id="L63" title="All 8 branches missed.">        if ((deltaX == 1 &amp;&amp; deltaY &lt;= 1) || (deltaY == 1 &amp;&amp; deltaX &lt;= 1)) {</span>
+            // Check if there is no piece of the same player at the target location
+<span class="nc" id="L65">            Piece targetPiece = board.getPieceAt(target);</span>
+<span class="nc bnc" id="L66" title="All 4 branches missed.">            return targetPiece == null || targetPiece.getOwner() != this.getOwner();</span>
+        }
+
+<span class="nc" id="L69">        return false;</span>
+    }
+    /**
+     * Get a list of surrounding Coordinates within the board boundary.
+     *
+     * @return ArrayList of surrounding Coordinates.
+     */
+    public ArrayList&lt;Coordinate&gt; getSurroundingCoordinates() {
+<span class="nc" id="L77">        ArrayList&lt;Coordinate&gt; surroundingCoordinates = new ArrayList&lt;&gt;();</span>
+
+<span class="nc" id="L79">        int x = this.getCoordinate().getX();</span>
+<span class="nc" id="L80">        int y = this.getCoordinate().getY();</span>
+
+        // The directions around a piece
+<span class="nc" id="L83">        int[] directions = {-1, 0, 1};</span>
+
+<span class="nc bnc" id="L85" title="All 2 branches missed.">        for (int dx : directions) {</span>
+<span class="nc bnc" id="L86" title="All 2 branches missed.">            for (int dy : directions) {</span>
+<span class="nc bnc" id="L87" title="All 4 branches missed.">                if (!(dx == 0 &amp;&amp; dy == 0)) {  // Ignore the piece itself</span>
+<span class="nc" id="L88">                    int newX = x + dx;</span>
+<span class="nc" id="L89">                    int newY = y + dy;</span>
+
+                    // Check if the coordinate is within the board
+<span class="nc bnc" id="L92" title="All 8 branches missed.">                    if (newX &gt;= 0 &amp;&amp; newX &lt; BOARD_SIZE &amp;&amp; newY &gt;= 0 &amp;&amp; newY &lt; BOARD_SIZE) {</span>
+<span class="nc" id="L93">                        surroundingCoordinates.add(new Coordinate(newX, newY));</span>
+                    }
+                }
+            }
+        }
+
+<span class="nc" id="L99">        return surroundingCoordinates;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>
